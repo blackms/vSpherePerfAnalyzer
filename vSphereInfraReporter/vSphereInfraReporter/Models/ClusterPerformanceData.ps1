@@ -13,17 +13,22 @@
 class ClusterPerformanceData
 {
 	# Properties
+	[System.String]$cluster
+	[System.String]$vCenter
+	[System.String]$state
 	[float]$pSocket = 0
 	[float]$pCore = 0
 	[int]$logicalCpu = 0
 	[int]$vCpu = 0
-	[int]$cpuRatioRaw
+	[float]$cpuRatioRaw
+	[System.String]$cpuRatio
 	[float]$avgMaxCpu = 0
 	[int]$maxCpu = 0
 	[int]$minCpu = 0
 	[int]$pRam = 0
 	[int]$vRam = 0
 	[float]$ramRatioRaw = 0
+	[string]$ramRatio
 	[float]$avgRam = 0
 	[float]$maxRam = 0
 	[float]$minRam = 0

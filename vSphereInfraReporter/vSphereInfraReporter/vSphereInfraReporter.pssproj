@@ -36,7 +36,6 @@
     <Compile Include="Core\vcConnector.ps1" />
     <Compile Include="Models\ClusterPerformanceData.ps1" />
     <Compile Include="Models\HostDetailsData.ps1" />
-    <Compile Include="Models\VCenterCollectedData.ps1" />
     <Compile Include="vSphereInfraReporter.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

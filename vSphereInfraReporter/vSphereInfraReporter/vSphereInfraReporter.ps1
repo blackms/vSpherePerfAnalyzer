@@ -109,10 +109,13 @@ function RetrieveVCenterPerformances
 		
 		$VMclusters = Get-View -ViewType ComputeResource
 		
+		[System.Collections.Generic.List[System.Management.Automation.PSCustomObject]]$Report
+
 		ForEach ($VMcluster in $VMclusters)
 		{
 			$Logger.Info("`t`tProcessing Cluster " + $VMcluster + " (" + $CLcount + " of " + $VMclusters.count + ")")
 			[ClusterPerformanceData]$clusterPerformanceData = [ClusterPerformanceData]::new()
+			[ClusterPerformanceData]$tmpClusterPerformanceData = [ClusterPerformanceData]::new()
 			$CLcount++
 			$VMhosts = Get-View -ViewType HostSystem
 			ForEach ($VMhost in $VMhosts)
@@ -168,45 +171,41 @@ function RetrieveVCenterPerformances
 				$hostDetailsData.maxRam = "$([math]::Round($VMhostStatRAM.Maximum, 2))" + "%"
 				$hostDetailsData.minRam = "$([math]::Round($VMhostStatRAM.Minimum, 2))" + "%"
 				$hostDetailsData.vms = $VMhost.extensiondata.vm.count
+
+				$Report += $hostDetailsData
 				
 				$clusterPerformanceData.pSocket += $VMhostDetails.hardware.cpuinfo.numCpuPackages
 				$clusterPerformanceData.pCore += $VMhostDetails.hardware.cpuinfo.numCpuCores
 				$clusterPerformanceData.logicalCpu += $VMhostThreads
-				$clusterPerformanceData.vCpu += $vCPU
-				$clusterPerformanceData.cpuRatioRaw += $CPUratioRaw
-				$clusterPerformanceData.avgMaxCpu += [Math]::Round($VMhostStatCPU.Average, 2)
-				$clusterPerformanceData.maxCpu += [Math]::Round($VMhostStatCPU.Maximum, 2)
-				$clusterPerformanceData.minCpu += [Math]::Round($VMhostStatCPU.Minimum, 2)
-				$clusterPerformanceData.pRam += $VMhostRAM
-				$clusterPerformanceData.vRam += $vRAM
-				$clusterPerformanceData.ramRatioRaw += $RAMratioRaw
-				$clusterPerformanceData.avgRam += [Math]::Round($VMhostStatRAM.Average, 2)
-				$clusterPerformanceData.maxRam += [Math]::Round($VMhostStatRAM.Maximum, 2)
-				$clusterPerformanceData.minRam += [Math]::Round($VMhostStatRAM.Minimum, 2)
-				$clusterPerformanceData.vms += $hostDetailsData.vms
+				$ClusterPerformanceData.vCpu += $vCPU
+				$ClusterPerformanceData.cpuRatioRaw += $CPUratioRaw
+				$ClusterPerformanceData.avgMaxCpu += [Math]::Round($VMhostStatCPU.Average, 2)
+				$ClusterPerformanceData.maxCpu += [Math]::Round($VMhostStatCPU.Maximum, 2)
+				$ClusterPerformanceData.minCpu += [Math]::Round($VMhostStatCPU.Minimum, 2)
+				$ClusterPerformanceData.pRam += $VMhostRAM
+				$ClusterPerformanceData.vRam += $vRAM
+				$ClusterPerformanceData.ramRatioRaw += $RAMratioRaw
+				$ClusterPerformanceData.avgRam += [Math]::Round($VMhostStatRAM.Average, 2)
+				$ClusterPerformanceData.maxRam += [Math]::Round($VMhostStatRAM.Maximum, 2)
+				$ClusterPerformanceData.minRam += [Math]::Round($VMhostStatRAM.Minimum, 2)
+				$ClusterPerformanceData.vms += $hostDetailsData.vms
 			}
-			$Row = "" | Select-Object vCenter, Description, Cluster, Host, Type, State, pSocket, pCore, LogicalCPU, vCPU, CPUratio, AvgCPU, MaxCPU, MinCPU, pRAM, vRAM, UsgRAM, AvgRAM, MaxRAM, MinRAM, VMs
-			$Row.vCenter = $vCsvr
-			$Row.Description = $vCdescription
-			$Row.Cluster = $VMcluster.Name
-			$Row.Host = $VMhosts.count
-			$Row.Type = "vSphere Compute Cluster"
-			$Row.State = $VMcluster.extensiondata.OverallStatus
-			$Row.pSocket = $ClusterpSocket
-			$Row.pCore = $ClusterpCore
-			$Row.LogicalCPU = $ClusterLogicalCPU
-			$Row.vCPU = $ClustervCPU
-			$Row.CPUratio = "$([math]::Round($ClusterCPUratioRaw/$VMhosts.count, 2))" + ":1"
-			$Row.AvgCPU = "$([math]::Round($ClusterAvgCPU/$VMhosts.count, 0))" + "%"
-			$Row.MaxCPU = "$([math]::Round($ClusterMaxCPU/$VMhosts.count, 0))" + "%"
-			$Row.MinCPU = "$([math]::Round($ClusterMinCPU/$VMhosts.count, 0))" + "%"
-			$Row.pRAM = $ClusterpRAM
-			$Row.vRAM = $ClustervRAM
-			$Row.UsgRAM = "$([math]::Round($ClusterRAMratioRaw/$VMhosts.count, 0))" + "%"
-			$Row.AvgRAM = "$([math]::Round($ClusterAvgRAM/$VMhosts.count, 0))" + "%"
-			$Row.MaxRAM = "$([math]::Round($ClusterMaxRAM/$VMhosts.count, 0))" + "%"
-			$Row.MinRAM = "$([math]::Round($ClusterMinRAM/$VMhosts.count, 0))" + "%"
-			$Row.VMs = $ClusterVMs
+			$ClusterPerformanceData.vCenter = $vCenterName
+			$ClusterPerformanceData.cluster = $VMcluster.Name
+			$ClusterPerformanceData.host = $VMhosts.count
+			$ClusterPerformanceData.type = "vSphere Compute Cluster"
+			$ClusterPerformanceData.state = $VMcluster.extensiondata.OverallStatus
+			$ClusterPerformanceData.CPUratio = "[math]::Round($ClusterPerformanceData.cpuRatioRaw/$VMhosts.count, 2))" + ":1"
+			$ClusterPerformanceData.AvgCPU = [math]::Round($ClusterPerformanceData.avgMaxCpu / $VMhosts.count, 0)
+			$ClusterPerformanceData.MaxCPU = [math]::Round($ClusterMaxCPU/$VMhosts.count, 0)
+			$ClusterPerformanceData.MinCPU = "$([math]::Round($ClusterMinCPU/$VMhosts.count, 0))" + "%"
+			$ClusterPerformanceData.pRAM = $ClusterpRAM
+			$ClusterPerformanceData.vRAM = $ClustervRAM
+			$ClusterPerformanceData.UsgRAM = "$([math]::Round($ClusterRAMratioRaw/$VMhosts.count, 0))" + "%"
+			$ClusterPerformanceData.AvgRAM = "$([math]::Round($ClusterAvgRAM/$VMhosts.count, 0))" + "%"
+			$ClusterPerformanceData.MaxRAM = "$([math]::Round($ClusterMaxRAM/$VMhosts.count, 0))" + "%"
+			$ClusterPerformanceData.MinRAM = "$([math]::Round($ClusterMinRAM/$VMhosts.count, 0))" + "%"
+			$ClusterPerformanceData.VMs = $ClusterVMs
 		}
 	}
 	End
