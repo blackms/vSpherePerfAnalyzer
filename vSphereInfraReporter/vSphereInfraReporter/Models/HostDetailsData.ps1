@@ -24,15 +24,15 @@ class HostDetailsData
 	[System.String]$vCPU
 	[System.String]$cpuRatio
 	[System.String]$cpuRatioRaw
-	[float]$avgCPU
-	[float]$maxCPU
-	[float]$minCPU
+	[System.String]$avgCPU
+	[System.String]$maxCPU
+	[System.String]$minCPU
 	[int]$pRam
 	[int]$vRam
-	[float]$usgRam
-	[float]$avgRam
-	[float]$maxRam
-	[float]$minRam
+	[System.String]$usgRam
+	[System.String]$avgRam
+	[System.String]$maxRam
+	[System.String]$minRam
 	[int]$vms
 	
 	HostDetailsData()

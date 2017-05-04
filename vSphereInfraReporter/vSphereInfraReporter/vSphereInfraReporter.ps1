@@ -44,12 +44,11 @@ param
 )
 
 # Import core Modules
-."core\Logging.ps1"
-."core\vcConnector.ps1"
-."core\BackgroundJob.ps1"
-."models\ClusterPerformanceData.ps1"
-."models\HostDetailsData.ps1"
-."models\VCenterCollectedData.ps1"
+."Core\Logging.ps1"
+."Core\vcConnector.ps1"
+."Core\BackgroundJob.ps1"
+."Models\ClusterPerformanceData.ps1"
+."Models\HostDetailsData.ps1"
 
 <#
 	.SYNOPSIS
@@ -116,6 +115,7 @@ function RetrieveVCenterPerformances
 			$Logger.Info("`t`tProcessing Cluster " + $VMcluster + " (" + $CLcount + " of " + $VMclusters.count + ")")
 			[ClusterPerformanceData]$clusterPerformanceData = [ClusterPerformanceData]::new()
 			[ClusterPerformanceData]$tmpClusterPerformanceData = [ClusterPerformanceData]::new()
+			
 			$CLcount++
 			$VMhosts = Get-View -ViewType HostSystem
 			ForEach ($VMhost in $VMhosts)
@@ -206,6 +206,8 @@ function RetrieveVCenterPerformances
 			
 			$Report += $clusterPerformanceData
 		}
+		
+		return $Report
 	}
 	End
 	{
